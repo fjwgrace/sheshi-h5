@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生成占位图 - 桦榕奢石</title>
+<style>
+  body { font-family: 'Noto Serif SC', serif; padding: 20px; background: #faf8f5; color: #4a3a2a; }
+  canvas { display: block; margin: 12px 0; border-radius: 4px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  h2 { font-weight: 500; letter-spacing: 4px; margin-bottom: 4px; }
+  .item { margin-bottom: 32px; }
+  button { padding: 8px 20px; border: 1px solid #c9b99a; background: transparent; color: #7a6a5a; cursor: pointer; font-family: inherit; margin-right: 8px; }
+  button:hover { background: #c9b99a; color: #fff; }
+</style>
+</head>
+<body>
+<h2>桦榕奢石 · 占位图生成器</h2>
+<p style="color:#b8a99a;margin-bottom:24px;">点击下方按钮逐个下载，放入 images/placeholder/ 目录</p>
+<div id="items"></div>
+
+<script>
+var items = [
+  { name:'slab.jpg', label:'原石板', bg:'#e8e0d4' },
+  { name:'table.jpg', label:'餐桌', bg:'#f0e8dc' },
+  { name:'wall.jpg', label:'背景墙', bg:'#d8cebe' },
+  { name:'scene.jpg', label:'实景案例', bg:'#e0d8cc' }
+];
+
+var container = document.getElementById('items');
+
+items.forEach(function(item) {
+  var div = document.createElement('div');
+  div.className = 'item';
+
+  var canvas = document.createElement('canvas');
+  canvas.width = 800;
+  canvas.height = 600;
+  var ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = item.bg;
+  ctx.fillRect(0, 0, 800, 600);
+
+  // Stone-like veins
+  for (var i = 0; i < 25; i++) {
+    ctx.strokeStyle = 'rgba(180,160,140,' + (0.1 + Math.random() * 0.3) + ')';
+    ctx.lineWidth = 0.5 + Math.random() * 3;
+    ctx.beginPath();
+    var y = 60 + i * 22 + (Math.random() - 0.5) * 30;
+    ctx.moveTo(0, y);
+    ctx.bezierCurveTo(200, y + (Math.random()-0.5)*60, 500, y + (Math.random()-0.5)*60, 800, y + (Math.random()-0.5)*30);
+    ctx.stroke();
+  }
+
+  // Subtle radial highlight
+  var grad = ctx.createRadialGradient(300, 250, 50, 400, 300, 500);
+  grad.addColorStop(0, 'rgba(255,255,255,0.08)');
+  grad.addColorStop(1, 'rgba(0,0,0,0.05)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 800, 600);
+
+  // Label
+  ctx.fillStyle = '#c9b99a';
+  ctx.font = '28px "Noto Serif SC", serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(item.label + ' — 桦榕奢石', 400, 568);
+
+  div.appendChild(canvas);
+
+  var btn = document.createElement('button');
+  btn.textContent = '下载 ' + item.name;
+  btn.onclick = function() {
+    var a = document.createElement('a');
+    a.download = item.name;
+    a.href = canvas.toDataURL('image/jpeg', 0.85);
+    a.click();
+  };
+  div.appendChild(btn);
+
+  container.appendChild(div);
+});
+</script>
+</body>
+</html>

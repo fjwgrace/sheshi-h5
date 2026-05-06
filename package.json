@@ -1,0 +1,8 @@
+{
+  "name": "sheshi-h5",
+  "private": true,
+  "scripts": {
+    "build:gallery": "node scripts/build-gallery.mjs",
+    "build": "node scripts/build-gallery.mjs"
+  }
+}

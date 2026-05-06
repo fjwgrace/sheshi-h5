@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>桦榕奢石</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <main id="view-container">
+      <div id="view-home" class="view active">
+        <div class="nav-bar">
+          <div class="nav-brand">桦榕</div>
+          <div class="nav-subtitle">NATURAL STONE</div>
+        </div>
+
+        <div class="home-hero">
+          <img class="home-hero-img img-placeholder" src="images/home-hero.jpg" alt="桦榕奢石">
+        </div>
+
+        <div class="home-tagline">
+          <p>石之纹理<br>自然造物<br>以此为家</p>
+          <div class="divider-dot" style="margin-top:24px;"></div>
+        </div>
+
+        <div class="home-cta">
+          <button class="btn-outline" id="btn-enter">选品中心</button>
+        </div>
+
+        <div class="home-footer">
+          <p>桦榕奢石 · 源自天然</p>
+        </div>
+      </div>
+
+      <div id="view-list" class="view">
+        <div class="nav-bar">
+          <div class="nav-brand" style="font-size:14px;letter-spacing:4px;">选品中心</div>
+          <div class="nav-subtitle" id="list-count">32 种奢石</div>
+        </div>
+
+        <div class="search-bar">
+          <div class="search-input-wrap">
+            <span class="search-icon">&#128269;</span>
+            <input type="text" id="search-input" class="search-input" placeholder="搜索奢石名称或色系..." autocomplete="off">
+            <button id="search-clear" class="search-clear" style="display:none;">&#10005;</button>
+          </div>
+        </div>
+
+        <div class="stone-list" id="stone-list">
+        </div>
+
+        <div id="list-empty" class="list-empty" style="display:none;">
+          <p>未找到匹配的奢石</p>
+          <p class="list-empty-hint">试试其他关键词</p>
+        </div>
+      </div>
+      <div id="view-detail" class="view">
+        <div style="padding:14px 16px;">
+          <button class="back-btn" id="btn-back">← 选品中心</button>
+        </div>
+        <div id="detail-content">
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="js/gallery-data.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
