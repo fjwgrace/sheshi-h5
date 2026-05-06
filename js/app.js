@@ -323,6 +323,13 @@
       });
     }
 
+    var btnHome = document.getElementById('btn-home');
+    if (btnHome) {
+      btnHome.addEventListener('click', function() {
+        navigateTo('home');
+      });
+    }
+
     var searchInput = document.getElementById('search-input');
     var searchClear = document.getElementById('search-clear');
     if (searchInput) {
@@ -361,6 +368,49 @@
         navigateTo('list');
       });
     }
+
+    function copyText(text) {
+      if (!text) return Promise.reject(new Error('empty'));
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+      }
+      return new Promise(function(resolve, reject) {
+        try {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          ta.style.top = '0';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          var ok = document.execCommand('copy');
+          ta.remove();
+          ok ? resolve() : reject(new Error('copy failed'));
+        } catch (e) {
+          reject(e);
+        }
+      });
+    }
+
+    document.querySelectorAll('[data-copy]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var value = this.getAttribute('data-copy') || '';
+        var actionEl = this.querySelector('.contact-chip-action');
+        var original = actionEl ? actionEl.textContent : '';
+        copyText(value).then(function() {
+          if (actionEl) actionEl.textContent = '已复制';
+          setTimeout(function() {
+            if (actionEl) actionEl.textContent = original || '点击复制';
+          }, 1200);
+        }).catch(function() {
+          if (actionEl) actionEl.textContent = '复制失败';
+          setTimeout(function() {
+            if (actionEl) actionEl.textContent = original || '点击复制';
+          }, 1200);
+        });
+      });
+    });
 
     var touchStartY = 0;
     document.addEventListener('touchstart', function(e) {

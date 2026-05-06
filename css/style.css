@@ -101,6 +101,19 @@ img {
   letter-spacing: 1px;
 }
 
+/* === Nav Bar (List) === */
+.nav-bar-list {
+  position: relative;
+}
+
+.nav-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  letter-spacing: 4px;
+}
+
 /* === Back Button === */
 .back-btn {
   display: inline-flex;
@@ -317,6 +330,79 @@ img {
   font-size: 11px;
   margin-top: 8px;
   opacity: 0.6;
+}
+
+/* === Contact card === */
+.contact-card {
+  padding: 18px 16px 28px;
+}
+
+.contact-card-inner {
+  border: 1px solid var(--divider);
+  background: var(--surface);
+  border-radius: 2px;
+  padding: 14px 12px 12px;
+}
+
+.contact-card-compact {
+  padding-top: 8px;
+}
+
+.contact-title {
+  font-family: var(--font-serif);
+  font-size: 10px;
+  color: var(--text-secondary);
+  letter-spacing: 6px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.contact-chip {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 10px;
+  border: 1px solid var(--divider);
+  background: var(--bg);
+  border-radius: 999px;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+
+.contact-chip:active {
+  opacity: 0.85;
+}
+
+.contact-chip + .contact-chip {
+  margin-top: 10px;
+}
+
+.contact-chip-label {
+  font-size: 10px;
+  color: var(--text-secondary);
+  letter-spacing: 2px;
+  flex-shrink: 0;
+}
+
+.contact-chip-value {
+  font-size: 12px;
+  color: var(--text);
+  letter-spacing: 0.5px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.contact-chip-action {
+  font-size: 10px;
+  color: #9b8b7a;
+  letter-spacing: 1px;
+  flex-shrink: 0;
 }
 
 /* === Detail Page === */
