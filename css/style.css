@@ -360,7 +360,8 @@ img {
 .contact-chip {
   width: 100%;
   display: flex;
-  align-items: baseline;
+  align-items: center;
+  /* flex gap 在部分微信/旧 WebView 上不生效：下面用 margin 做兜底 */
   gap: 10px;
   padding: 10px 10px;
   border: 1px solid var(--divider);
@@ -369,6 +370,11 @@ img {
   text-decoration: none;
   cursor: pointer;
   font-family: var(--font-sans);
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .contact-chip:active {
@@ -384,6 +390,7 @@ img {
   color: var(--text-secondary);
   letter-spacing: 2px;
   flex-shrink: 0;
+  margin-right: 10px; /* gap 兜底 */
 }
 
 .contact-chip-value {
@@ -403,6 +410,8 @@ img {
   color: #9b8b7a;
   letter-spacing: 1px;
   flex-shrink: 0;
+  margin-left: auto; /* 无 gap 也能靠右 */
+  padding-left: 10px; /* gap 兜底 */
 }
 
 /* === Detail Page === */
