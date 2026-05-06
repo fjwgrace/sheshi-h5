@@ -8,12 +8,55 @@
     currentView: 'home',
     previousView: null,
     detailObserver: null,
+    listCuratedFooterObserver: null,
+    listFullCatalog: false,
   };
 
   function categoriesSource() {
     return typeof GALLERY_CATEGORIES !== 'undefined' && Array.isArray(GALLERY_CATEGORIES)
       ? GALLERY_CATEGORIES
       : [];
+  }
+
+  function curatedFoldersOrder() {
+    return typeof GALLERY_CURATED_FOLDERS !== 'undefined' && Array.isArray(GALLERY_CURATED_FOLDERS)
+      ? GALLERY_CURATED_FOLDERS
+      : [];
+  }
+
+  function curatedCategoriesList() {
+    var order = curatedFoldersOrder();
+    if (!order.length) return [];
+    var map = {};
+    categoriesSource().forEach(function(c) {
+      map[c.folder] = c;
+    });
+    var out = [];
+    order.forEach(function(folder) {
+      if (map[folder]) out.push(map[folder]);
+    });
+    return out;
+  }
+
+  function filterCategoriesByQuery(all, query) {
+    var q = String(query || '').trim().toLowerCase();
+    if (!q) return all.slice();
+    return all.filter(function(c) {
+      if (c.folder.toLowerCase().includes(q)) return true;
+      var meta = metaForFolder(c.folder);
+      if (!meta) return false;
+      return (meta.nameEn && meta.nameEn.toLowerCase().includes(q)) ||
+        meta.origin.toLowerCase().includes(q) ||
+        meta.type.toLowerCase().includes(q) ||
+        (meta.description && meta.description.toLowerCase().includes(q));
+    });
+  }
+
+  function teardownListCuratedFooter() {
+    if (state.listCuratedFooterObserver) {
+      state.listCuratedFooterObserver.disconnect();
+      state.listCuratedFooterObserver = null;
+    }
   }
 
   function escapeAttr(s) {
@@ -68,7 +111,64 @@
     }
   }
 
-  function renderCategoryList(list) {
+  function syncListCuratedFooter(options) {
+    var footer = document.getElementById('list-curated-footer');
+    var btn = document.getElementById('btn-view-all-stones');
+    var hint = document.getElementById('list-curated-hint');
+    var sentinel = document.getElementById('list-curated-sentinel');
+    teardownListCuratedFooter();
+
+    var opts = options || {};
+    var showChrome = opts.curatedMode && !opts.searchQuery && curatedFoldersOrder().length > 0 && !state.listFullCatalog;
+
+    if (!footer || !btn || !sentinel) return;
+
+    if (!showChrome) {
+      footer.setAttribute('hidden', '');
+      btn.setAttribute('hidden', '');
+      if (hint) hint.setAttribute('hidden', '');
+      return;
+    }
+
+    footer.removeAttribute('hidden');
+    btn.setAttribute('hidden', '');
+    if (hint) {
+      hint.removeAttribute('hidden');
+      hint.textContent = '向下滑动，浏览全部精选品类';
+    }
+
+    btn.onclick = function() {
+      state.listFullCatalog = true;
+      var all = categoriesSource();
+      var si = document.getElementById('search-input');
+      var query = (si && si.value) ? si.value.trim().toLowerCase() : '';
+      var display = query ? filterCategoriesByQuery(all, query) : all;
+      renderCategoryList(display, {
+        curatedMode: false,
+        totalCount: all.length,
+        searchQuery: query,
+      });
+      window.scrollTo(0, 0);
+    };
+
+    if ('IntersectionObserver' in window) {
+      state.listCuratedFooterObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            btn.removeAttribute('hidden');
+            if (hint) hint.setAttribute('hidden', '');
+          }
+        });
+      }, { root: null, rootMargin: '100px', threshold: 0 });
+      state.listCuratedFooterObserver.observe(sentinel);
+    } else {
+      btn.removeAttribute('hidden');
+      if (hint) hint.setAttribute('hidden', '');
+    }
+  }
+
+  function renderCategoryList(list, renderOpts) {
+    var ro = renderOpts || {};
     var container = document.getElementById('stone-list');
     var countEl = document.getElementById('list-count');
     var emptyEl = document.getElementById('list-empty');
@@ -77,11 +177,22 @@
     if (!list.length) {
       container.innerHTML = '';
       if (emptyEl) emptyEl.style.display = 'block';
-      if (countEl) countEl.textContent = '0 种奢石';
+      if (countEl) {
+        countEl.textContent = ro.searchQuery ? '找到 0 种' : '0 种奢石';
+      }
+      syncListCuratedFooter(ro);
       return;
     }
     if (emptyEl) emptyEl.style.display = 'none';
-    if (countEl) countEl.textContent = list.length + ' 种奢石';
+    if (countEl) {
+      if (ro.curatedMode && !ro.searchQuery && typeof ro.totalCount === 'number') {
+        countEl.textContent = '精选 ' + list.length + ' · 库内共 ' + ro.totalCount + ' 种';
+      } else if (ro.searchQuery) {
+        countEl.textContent = '找到 ' + list.length + ' 种';
+      } else {
+        countEl.textContent = list.length + ' 种奢石';
+      }
+    }
 
     container.innerHTML = list.map(function(c) {
       var meta = metaForFolder(c.folder);
@@ -118,11 +229,17 @@
         navigateTo('detail', folder);
       });
     });
+
+    syncListCuratedFooter(ro);
   }
 
-  function navigateTo(viewName, folderName) {
+  function navigateTo(viewName, folderName, navOpts) {
+    var no = navOpts || {};
     if (state.currentView === 'detail' && viewName !== 'detail') {
       teardownDetailLoader();
+    }
+    if (state.currentView === 'list' && viewName !== 'list') {
+      teardownListCuratedFooter();
     }
 
     state.previousView = state.currentView;
@@ -143,11 +260,36 @@
     window.scrollTo(0, 0);
 
     if (viewName === 'list') {
-      renderCategoryList(categoriesSource());
+      if (no.resetListMode) {
+        state.listFullCatalog = false;
+      }
+      if (no.clearSearch) {
+        var siClear = document.getElementById('search-input');
+        if (siClear) siClear.value = '';
+        var scClear = document.getElementById('search-clear');
+        if (scClear) scClear.style.display = 'none';
+      }
+
+      var all = categoriesSource();
       var si = document.getElementById('search-input');
-      if (si) { si.value = ''; }
-      var sc = document.getElementById('search-clear');
-      if (sc) { sc.style.display = 'none'; }
+      var query = (si && si.value) ? si.value.trim().toLowerCase() : '';
+      if (query) {
+        var filtered = filterCategoriesByQuery(all, query);
+        renderCategoryList(filtered, {
+          curatedMode: false,
+          totalCount: all.length,
+          searchQuery: query,
+        });
+      } else {
+        var curated = curatedCategoriesList();
+        var useCurated = curated.length > 0 && !state.listFullCatalog;
+        var list = useCurated ? curated : all;
+        renderCategoryList(list, {
+          curatedMode: useCurated,
+          totalCount: all.length,
+          searchQuery: '',
+        });
+      }
     } else if (viewName === 'detail' && folderName) {
       renderDetail(folderName);
     }
@@ -319,7 +461,7 @@
     var btnEnter = document.getElementById('btn-enter');
     if (btnEnter) {
       btnEnter.addEventListener('click', function() {
-        navigateTo('list');
+        navigateTo('list', null, { resetListMode: true, clearSearch: true });
       });
     }
 
@@ -338,19 +480,22 @@
         if (searchClear) searchClear.style.display = query ? 'block' : 'none';
         var all = categoriesSource();
         if (!query) {
-          renderCategoryList(all);
+          var curated = curatedCategoriesList();
+          var useCurated = curated.length > 0 && !state.listFullCatalog;
+          var list = useCurated ? curated : all;
+          renderCategoryList(list, {
+            curatedMode: useCurated,
+            totalCount: all.length,
+            searchQuery: '',
+          });
           return;
         }
-        var filtered = all.filter(function(c) {
-          if (c.folder.toLowerCase().includes(query)) return true;
-          var meta = metaForFolder(c.folder);
-          if (!meta) return false;
-          return (meta.nameEn && meta.nameEn.toLowerCase().includes(query)) ||
-            meta.origin.toLowerCase().includes(query) ||
-            meta.type.toLowerCase().includes(query) ||
-            (meta.description && meta.description.toLowerCase().includes(query));
+        var filtered = filterCategoriesByQuery(all, query);
+        renderCategoryList(filtered, {
+          curatedMode: false,
+          totalCount: all.length,
+          searchQuery: query,
         });
-        renderCategoryList(filtered);
       });
 
       if (searchClear) {
@@ -421,7 +566,7 @@
       if (state.currentView === 'home') {
         var deltaY = touchStartY - e.changedTouches[0].clientY;
         if (deltaY > 60) {
-          navigateTo('list');
+          navigateTo('list', null, { resetListMode: true, clearSearch: true });
         }
       }
     });

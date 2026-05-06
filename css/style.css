@@ -332,6 +332,54 @@ img {
   opacity: 0.6;
 }
 
+.list-curated-footer {
+  padding: 0 16px 8px;
+  text-align: center;
+}
+
+.list-curated-sentinel {
+  height: 4px;
+  width: 100%;
+  pointer-events: none;
+}
+
+.list-curated-hint {
+  font-size: 11px;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  margin: 4px 0 12px;
+  line-height: 1.5;
+}
+
+.list-curated-hint[hidden] {
+  display: none !important;
+}
+
+.btn-view-all-stones {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto 20px;
+  padding: 12px 20px;
+  font-family: var(--font-serif);
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.btn-view-all-stones:active {
+  background: rgba(201, 185, 154, 0.12);
+}
+
+.btn-view-all-stones[hidden] {
+  display: none !important;
+}
+
 /* === Contact card === */
 .contact-card {
   padding: 18px 16px 28px;
